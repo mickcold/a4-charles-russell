@@ -60,3 +60,8 @@ Include a very brief summary of your project here. Images are encouraged when ne
 - the goal of the application
 - challenges you faced in realizing the application
 - the instructions you present in the website should be clear enough to use the application, but if you feel any need to provide additional instructions please do so here.
+
+
+## UK Crime Visualization
+
+While making the site, I used Claude to assist me with building the file structure and setting up function stubs to achieve my desired goal of a data visualizer. Additionally, I used it to expedit debugging after I had taken a shot at fixing the bug to assist with solving it or tracking it down. I gave it the assignment details, a claude created summary of the work I've done with express prior, and the server.js file from A2/A3 to build the function stubs and file structure.
