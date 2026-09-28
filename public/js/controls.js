@@ -1,26 +1,39 @@
-//The user controls from index.html: police force file, crime type, and longitude/latitude ranges
-//This is the only file that knows the element IDs; everything else just reads settings
+//Handles the settings of the site, when the user changes a setting this is what sees it and updates accordingly
 
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm'
 
-//Wires every control; changing the file needs a reload, the filters only need a redraw
+//Sets up the controls for every input the user has access to
 export const setupControls = function(onFilterChange, onFileChange) {
-  //TODO: #crime-file 'change' listener that calls onFileChange with the chosen file
-  //TODO: #filter-crime-type and the four sliders get 'input' listeners that call onFilterChange
-  //TODO: each slider also updates its <output> (e.g. #lon-min-output) so it shows its number
-  //TODO: decide what happens when a "From" slider is dragged past its "To" slider
+  const fileSelect = document.querySelector('#crime-file')
+  fileSelect.addEventListener('change', function() {
+    onFileChange(fileSelect.value)
+  })
+
+  const crimeSelect = document.querySelector('#filter-crime-type')
+  crimeSelect.addEventListener('change', function() {
+    onFilterChange()
+  })
+
+  const sliders = ['lon-min', 'lon-max', 'lat-min', 'lat-max']
+
+  sliders.forEach(id => {
+    const sliderSet = document.querySelector('#' + id)
+    sliderSet.addEventListener('input', function() {
+      document.querySelector('#' + id + '-output').textContent = sliderSet.value
+      onFilterChange()
+    })
+  })
 }
 
-//Returns the current value of every control as one settings object
+//Returns the current controls as a settings object
 export const readControls = function() {
-  //TODO: read the real values from the elements; slider .value is a string, so convert to numbers
   return {
-    file:      '',
-    crimeType: 'all',
-    lonMin:    -180,
-    lonMax:    180,
-    latMin:    -90,
-    latMax:    90
+    file: document.querySelector('#crime-file').value,
+    crimeType: document.querySelector('#filter-crime-type').value,
+    lonMin: Number(document.querySelector('#lon-min').value),
+    lonMax: Number(document.querySelector('#lon-max').value),
+    latMin: Number(document.querySelector('#lat-min').value),
+    latMax: Number(document.querySelector('#lat-max').value)
   }
 }
 
@@ -38,25 +51,26 @@ export const fillFileOptions = function(files) {
   });
 }
 
-//Selects a file in #crime-file without the user clicking it (used for the random default)
+//Default crime file selector
 export const selectFile = function(file) {
   document.querySelector('#crime-file').value = file
 }
 
-//Replaces #filter-crime-type's options with 'All' plus the crime types found in the loaded rows
+//Clears selection of crime types, if any, and adds the unique types found in the file to the list
 export const fillCrimeTypeOptions = function(rows) {
-  //TODO: clear the old options (a new file can have different types), keep 'All'
+  //Empties the selections
   const selection = document.querySelector('#filter-crime-type')
   selection.innerHTML = ''
 
+  //Preselects all
   const allOption = document.createElement('option')
   allOption.value = 'all'
   allOption.textContent = 'All'
   selection.append(allOption)
 
+  //Adds the unique crime types
   const types = rows.map(row => row.crimeType)
   const uniqueTypes = new Set(types)
-  //TODO: collect the unique crime types (new Set) and append an <option> for each
 
   uniqueTypes.forEach(element => {
     const option = document.createElement('option')
@@ -68,13 +82,25 @@ export const fillCrimeTypeOptions = function(rows) {
   })
 }
 
-//Sets the four sliders' min/max to the loaded file's longitude/latitude extent, and resets them to the full range
+const setSlider = function(id, min, max, value) {
+  const slider = document.querySelector('#' + id)
+  slider.min = min
+  slider.max = max
+  slider.value = value
+  document.querySelector('#' + id + '-output').textContent = slider.value
+}
+
+//Sets the sliders to the min/max of the loaded file's longitude and latitude
 export const setLocationBounds = function(rows) {
-  //TODO: find the smallest and largest lon and lat (rows with no location don't count)
+  //Getting the min/max pairs
+  const mmLon = d3.extent(rows, row => row.lon)
+  const mmLat = d3.extent(rows, row => row.lat)
 
-  const minMax = d3.extent(rows)
+  //Longitude slider
+  setSlider('lon-min', mmLon[0], mmLon[1], mmLon[0])
+  setSlider('lon-max', mmLon[0], mmLon[1], mmLon[1])
 
-  
-
-  //TODO: set min, max and value on each slider, and update its <output>
+  //Latitude slider
+  setSlider('lat-min', mmLat[0], mmLat[1], mmLat[0])
+  setSlider('lat-max', mmLat[0], mmLat[1], mmLat[1])
 }

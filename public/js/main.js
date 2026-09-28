@@ -1,7 +1,4 @@
-//Entry point: loads the data, builds the chart and controls, and redraws whenever a control changes
-//This file is glue; the real work lives in data.js, glyphs.js, chart.js and controls.js
-
-//TO DO: Rewrite main comment
+//Loads and updates data, draws the chart, and starts the site
 
 import {loadFileList, loadData, filterRows, capRows} from './data.js'
 import {setupChart, drawChart} from './chart.js'
@@ -13,9 +10,8 @@ const DATA_URL = 'data/UK_Crime_Data/'
 //List of every data file
 const MANIFEST_URL = DATA_URL + 'files.json'
 
-//Most crimes drawn at once, so big files don't freeze the page
-//TODO: pick the number by trying the Metropolitan file
-const MAX_MARKS = 1000
+//Entry cap
+const MAX_MARKS = 350
 
 let allRows = []
 let chart = null
