@@ -42,15 +42,20 @@ export const cleanRow = function(raw) {
   }
 }
 
-//Keeps only the rows that match the current control settings
+//Filters for the entries that match the settings set by the user in the controls
 export const filterRows = function(rows, settings) {
-  //TODO: filter by settings.crimeType ('all' keeps everything)
-  //TODO: keep rows with lon between settings.lonMin and settings.lonMax, and lat between settings.latMin and settings.latMax
-  return rows
+  const filteredRows = rows.filter(entry => {
+    if (((settings.lonMin <= entry.lon) && (entry.lon <= settings.lonMax)) && ((settings.latMin <= entry.lat) && (entry.lat <= settings.latMax))) {
+      if (entry.crimeType === settings.crimeType || settings.crimeType === 'all') {
+        return true
+      }
+    }
+  })
+
+  return filteredRows
 }
 
-//Keeps only the first max rows so the SVG doesn't freeze on big files (Metropolitan has ~91k crimes)
+//Limits the number of functions drawn
 export const capRows = function(rows, max) {
-  //TODO: return the first max rows
-  return rows
+  return rows.slice(0, max)
 }
