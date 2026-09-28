@@ -24,8 +24,8 @@ export const readControls = function() {
 
 //Adds the files in the array to the list of options for the user to pick from in the form of an <option>
 export const fillFileOptions = function(files) {
-  files.array.forEach(element => {
-    const temp = files[element]
+  files.forEach(entry => {
+    const temp = entry
     const option = document.createElement('option')
 
     //Setting the option values; the URL and the name
