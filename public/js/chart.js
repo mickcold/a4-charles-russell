@@ -1,43 +1,102 @@
-//All of the D3 drawing lives here
-//d3 is imported as a module from the CDN, so there's no global d3 and no npm package for the browser
+//Manages all of the drawing done by d3.js
 
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm'
 import {pickGlyph, slopeFor, functionPoints, colorFor} from './glyphs.js'
 
-//Size of the drawing area, and room around it for the axes
+//Size of area
 const WIDTH  = 800,
       HEIGHT = 500,
       MARGIN = {top: 20, right: 20, bottom: 40, left: 50}
 
-//Runs once: creates the <svg>, the groups for the marks and axes, and the scales
-//Returns an object that drawChart receives every time it redraws
+//Runs once creating the svg and an object for redrawing the chart with drawChart
 export const setupChart = function(selector) {
-  //TODO: d3.select(selector).append('svg') with a viewBox so it scales to the page
-  //TODO: append a <g> for the marks, one for the x axis (longitude), one for the y axis (latitude)
-  //TODO: create the x and y scales (domains get set in drawChart, from the slider ranges)
-  return {}
+  const svg = d3.select(selector).append('svg')
+    .attr('viewBox', `0 0 ${WIDTH} ${HEIGHT}`)
+
+  //Keeps everything in bounds of the screen
+  svg.append('clipPath')
+    .attr('id', 'plot-clip')
+    .append('rect')
+    .attr('x', MARGIN.left)
+    .attr('y', MARGIN.top)
+    .attr('width', WIDTH - MARGIN.left - MARGIN.right)
+    .attr('height', HEIGHT - MARGIN.top - MARGIN.bottom)
+
+  const marks = svg.append('g')
+    .attr('class', 'marks')
+    .attr('clip-path', 'url(#plot-clip)')
+
+  //Longitude
+  const xAxis = svg.append('g')
+    .attr('class', 'axis x-axis')
+    .attr('transform', `translate(0, ${HEIGHT - MARGIN.bottom})`)
+
+  //Latitude
+  const yAxis = svg.append('g')
+    .attr('class', 'axis y-axis')
+    .attr('transform', `translate(${MARGIN.left}, 0)`)
+
+  const x = d3.scaleLinear().range([MARGIN.left, WIDTH - MARGIN.right])
+  const y = d3.scaleLinear().range([HEIGHT - MARGIN.bottom, MARGIN.top])
+
+  //Turns [lon, lat] into a d string
+  const line = d3.line()
+    .defined(point => Number.isFinite(point[1]))
+    .x(point => x(point[0]))
+    .y(point => y(point[1]))
+
+  return {svg, marks, xAxis, yAxis, x, y, line}
 }
 
-//Runs on every update: sets the scale domains, redraws the axes, and joins rows to marks
-//Every mark is a <path> whose 'd' string comes from d3.line() drawing that crime's function curve
+//Runs of every update setting up domain, axes, and marks for functions
 export const drawChart = function(chart, rows, settings) {
-  //TODO: set scale domains from settings (lonMin..lonMax, latMin..latMax)
-  //TODO: selection.data(rows, row => row.crimeId).join('path') with d = markPath, transform = markTransform, stroke/fill = colorFor
-  //TODO: attach pointer events for the tooltip (pointerenter / pointermove / pointerleave)
+  chart.x.domain([settings.lonMin, settings.lonMax])
+  chart.y.domain([settings.latMin, settings.latMax])
+
+  chart.xAxis.call(d3.axisBottom(chart.x))
+  chart.yAxis.call(d3.axisLeft(chart.y))
+
+  chart.marks.selectAll('path')
+    .data(rows, row => row.crimeId)
+    .join('path')
+    .attr('d', (row, index) => markPath(row, index, chart))
+    .attr('fill', 'none')
+    .attr('stroke', row => colorFor(row.crimeId))
+    .on('pointerenter pointermove', showTooltip)
+    .on('pointerleave', hideTooltip)
 }
 
-//Returns the 'd' string for one crime's function curve
-//index is the crime's position after filtering (it sets the slope)
+//Creates the d string for the crime's function
 export const markPath = function(row, index, chart) {
-  //TODO: pickGlyph(row.lsoaCode) → d3.line() over functionPoints(...)
-  return ''
+  const glyph = pickGlyph(row.lsoaCode)
+  const points = functionPoints(glyph.name, slopeFor(index), row.lon, row.lat, chart.x.domain())
+
+  return chart.line(points)
 }
 
-//Fills the tooltip with a crime's details and moves it next to the pointer
+//Shows the crime's details next to the cursor
 export const showTooltip = function(event, row) {
-  //TODO: set #tooltip text (crime type, location, LSOA name), position with event.clientX / event.clientY, unhide
+  const tooltip = document.querySelector('#tooltip')
+
+  tooltip.innerHTML = ''
+  const lines = [
+    row.crimeType,
+    'LSOA: ' + row.lsoaCode,
+    'Location: ' + row.lon.toFixed(4) + ', ' + row.lat.toFixed(4)
+  ]
+
+  lines.forEach(text => {
+    const div = document.createElement('div')
+    div.textContent = text
+    tooltip.append(div)
+  })
+
+  //Offsets the tooltip isn't shown under the cursor
+  tooltip.style.left = (event.clientX + 12) + 'px'
+  tooltip.style.top = (event.clientY + 12) + 'px'
+  tooltip.hidden = false
 }
 
 export const hideTooltip = function() {
-  //TODO: hide #tooltip
+  document.querySelector('#tooltip').hidden = true
 }

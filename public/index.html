@@ -23,7 +23,6 @@
 
       <div id='layout'>
 
-        <!-- The assignment needs at least four user-controlled parameters -->
         <aside id='controls'>
           <!-- Options are filled from data/UK_Crime_Data/files.json -->
           <label for='crime-file'>Police force</label>
@@ -35,8 +34,6 @@
             <option value='all'>All</option>
           </select>
 
-          <!-- min/max are placeholders; they get set to the loaded file's extent -->
-          <!-- step='any' because the default step of 1 would snap every value to a whole degree -->
           <fieldset>
             <legend>Longitude</legend>
             <label for='lon-min'>From: <output id='lon-min-output'>-180</output></label>
@@ -65,21 +62,19 @@
 
     </main>
 
-    <!-- Documentation shown when the page first loads (assignment requirement) -->
     <dialog id='help-dialog'>
       <article>
         <h2>How to use this</h2>
-        <!-- TODO: describe what the chart shows and what each control does -->
-        <p>TODO: each crime is drawn as a math function, picked from its neighborhood (LSOA) code.</p>
+        <p>Each crime from the dataset (up to 350) is turned into a math function and graphed</p>
         <ul>
-          <li><strong>Police force</strong>: TODO</li>
-          <li><strong>Crime type</strong>: TODO</li>
-          <li><strong>Longitude</strong>: TODO</li>
-          <li><strong>Latitude</strong>: TODO</li>
-          <li>Hover a mark to see its details.</li>
+          <li><strong>Police force</strong>: What UK police force's crime data is being used</li>
+          <li><strong>Crime type</strong>: What kind of crime it was</li>
+          <li><strong>Longitude</strong>: The longitude of where the crime took place</li>
+          <li><strong>Latitude</strong>: The latitude of where the crime took place</li>
+          <li>Hover over a mark for crime details</li>
         </ul>
         <footer>
-          <button type='button' id='help-close'>Got it</button>
+          <button type='button' id='help-close'>Yup!</button>
         </footer>
       </article>
     </dialog>
