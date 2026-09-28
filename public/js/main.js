@@ -1,6 +1,8 @@
 //Entry point: loads the data, builds the chart and controls, and redraws whenever a control changes
 //This file is glue; the real work lives in data.js, glyphs.js, chart.js and controls.js
 
+//TO DO: Rewrite main comment
+
 import {loadFileList, loadData, filterRows, capRows} from './data.js'
 import {setupChart, drawChart} from './chart.js'
 import {setupControls, readControls, fillFileOptions, selectFile, fillCrimeTypeOptions, setLocationBounds} from './controls.js'
@@ -27,17 +29,18 @@ const update = function() {
 }
 
 //Determines the random file shown at startup
-const pickRandomFile = function(files) {
-  const fileArray = JSON.parse(MANIFEST_URL)
-  const ranFileIndex = Math.floor(Math.random() * fileArray.length)
-  return fileArray[ranFileIndex]
+const randomFile = function(files) {
+  const ranFileIndex = Math.floor(Math.random() * files.length)
+  return files[ranFileIndex].file
 }
 
-//Loads a police force's file, then resets the controls that depend on it and redraws
-const loadFile = async function(file) {
-  //TODO: allRows = await loadData(DATA_URL + file)
-  //TODO: fillCrimeTypeOptions(allRows) and setLocationBounds(allRows), since a new file has new types and a new area
-  //TODO: update()
+//Loads crime data, resets controls, and updates the site
+const loadDataset = async function(file) {
+  allRows = await loadData(DATA_URL + file)
+  //Resets filters for new dataset
+  fillCrimeTypeOptions(allRows)
+  setLocationBounds(allRows)
+  update()
 }
 
 //Shows the help menu
@@ -58,15 +61,19 @@ const setupHelp = function() {
 const start = async function() {
   setupHelp()
 
-  //TODO: this loads the folder, not a file; replace with the manifest steps below
-  //TODO: files = await loadFileList(MANIFEST_URL), fillFileOptions(files), pick one with pickRandomFile, selectFile it, then loadFile it
-  allRows = await loadData(DATA_URL)
-  chart   = setupChart('#chart')
+  const fileList = await loadFileList(MANIFEST_URL)
+  const startFile = randomFile(fileList)
 
-  fillCrimeTypeOptions(allRows)
-  setupControls(update, loadFile)
+  //File selection
+  fillFileOptions(fileList)
+  //Selects the random file
+  selectFile(startFile)
+  
+  chart = setupChart('#chart')
 
-  update()
+  setupControls(update, loadDataset)
+
+  loadDataset(startFile)
 }
 
 start()

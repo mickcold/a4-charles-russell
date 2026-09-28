@@ -22,14 +22,24 @@ export const readControls = function() {
   }
 }
 
-//Adds one <option> per file from files.json to #crime-file, showing the label and using the file name as the value
+//Adds the files in the array to the list of options for the user to pick from in the form of an <option>
 export const fillFileOptions = function(files) {
-  //TODO: append an <option> for each {file, label}
+  files.array.forEach(element => {
+    const temp = files[element]
+    const option = document.createElement('option')
+
+    //Setting the option values; the URL and the name
+    option.value = temp.file
+    option.textContent = temp.label
+
+    //Adds it to the file options
+    document.querySelector('#crime-file').append(option)
+  });
 }
 
 //Selects a file in #crime-file without the user clicking it (used for the random default)
 export const selectFile = function(file) {
-  //TODO: set #crime-file's value
+  document.querySelector('#crime-file').value = file
 }
 
 //Replaces #filter-crime-type's options with 'All' plus the crime types found in the loaded rows
