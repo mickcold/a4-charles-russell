@@ -1,5 +1,4 @@
-//Everything about getting the data and shaping it before it's drawn
-//No d3 drawing happens here, so these functions are easy to test in the console
+//Functions for cleaning and loading the data used in the program
 
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm'
 
@@ -15,24 +14,32 @@ export const loadFileList = async function(url) {
   return jsonResponse
 }
 
-//Fetches one police force's CSV file and returns an array of cleaned rows
+//Fetches csv, cleans the data (removes entries with missing coords), and returns the cleaned array
 export const loadData = async function(url) {
   //d3.csv() fetches and parses the file at URL
   const response = await d3.csv(url)
 
-  return response.map(cleanRow)
+  const fData = response.filter(entry => {
+    if (entry.Longitude !== '') {
+      return true
+    }
+    else {
+      return false
+    }
+  })
+
+  return fData.map(cleanRow)
 }
 
-//Turns one raw CSV row into the shape the chart expects
-//e.g. {crimeId, lsoaCode, lsoaName, crimeType, location, lon, lat} with lon and lat as numbers, not strings
+//Takes a csv row and turns it into an object with only relevant data for the program to use
 export const cleanRow = function(raw) {
-  if (raw.Longitude === 'No Location' || raw.CrimeID) {
-    //Need to check this
-    return
+  return {
+    crimeId: raw['Crime ID'],
+    lsoaCode: raw['LSOA code'],
+    crimeType: raw['Crime type'],
+    lon: Number(raw['Longitude']),
+    lat: Number(raw['Latitude'])
   }
-
-  //TODO: pick out the columns you need ('Crime ID', 'LSOA code', 'Crime type', 'Longitude', 'Latitude', ...) and convert types
-  return raw
 }
 
 //Keeps only the rows that match the current control settings

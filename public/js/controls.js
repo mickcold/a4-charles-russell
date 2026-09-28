@@ -1,6 +1,8 @@
 //The user controls from index.html: police force file, crime type, and longitude/latitude ranges
 //This is the only file that knows the element IDs; everything else just reads settings
 
+import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm'
+
 //Wires every control; changing the file needs a reload, the filters only need a redraw
 export const setupControls = function(onFilterChange, onFileChange) {
   //TODO: #crime-file 'change' listener that calls onFileChange with the chosen file
@@ -25,12 +27,11 @@ export const readControls = function() {
 //Adds the files in the array to the list of options for the user to pick from in the form of an <option>
 export const fillFileOptions = function(files) {
   files.forEach(entry => {
-    const temp = entry
     const option = document.createElement('option')
 
     //Setting the option values; the URL and the name
-    option.value = temp.file
-    option.textContent = temp.label
+    option.value = entry.file
+    option.textContent = entry.label
 
     //Adds it to the file options
     document.querySelector('#crime-file').append(option)
@@ -45,11 +46,35 @@ export const selectFile = function(file) {
 //Replaces #filter-crime-type's options with 'All' plus the crime types found in the loaded rows
 export const fillCrimeTypeOptions = function(rows) {
   //TODO: clear the old options (a new file can have different types), keep 'All'
+  const selection = document.querySelector('#filter-crime-type')
+  selection.innerHTML = ''
+
+  const allOption = document.createElement('option')
+  allOption.value = 'all'
+  allOption.textContent = 'All'
+  selection.append(allOption)
+
+  const types = rows.map(row => row.crimeType)
+  const uniqueTypes = new Set(types)
   //TODO: collect the unique crime types (new Set) and append an <option> for each
+
+  uniqueTypes.forEach(element => {
+    const option = document.createElement('option')
+
+    option.value = element
+    option.textContent = element
+
+    selection.append(option)
+  })
 }
 
 //Sets the four sliders' min/max to the loaded file's longitude/latitude extent, and resets them to the full range
 export const setLocationBounds = function(rows) {
   //TODO: find the smallest and largest lon and lat (rows with no location don't count)
+
+  const minMax = d3.extent(rows)
+
+  
+
   //TODO: set min, max and value on each slider, and update its <output>
 }
