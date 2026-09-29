@@ -69,7 +69,7 @@ export const drawChart = function(chart, rows, settings) {
 //Creates the d string for the crime's function
 export const markPath = function(row, index, chart) {
   const glyph = pickGlyph(row.lsoaCode)
-  const points = functionPoints(glyph.name, slopeFor(index), row.lon, row.lat, chart.x.domain())
+  const points = functionPoints(glyph.name, slopeFor(index, row.crimeId), row.lon, row.lat, chart.x.domain(), chart.y.domain())
 
   return chart.line(points)
 }

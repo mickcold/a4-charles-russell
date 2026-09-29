@@ -20,7 +20,8 @@ export const loadData = async function(url) {
   const response = await d3.csv(url)
 
   const fData = response.filter(entry => {
-    if (entry.Longitude !== '') {
+    //Skips crimes with no location or no LSOA code (the LSOA code picks the crime's function)
+    if (entry.Longitude !== '' && entry['LSOA code'] !== '') {
       return true
     }
     else {
